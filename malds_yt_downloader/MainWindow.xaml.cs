@@ -56,11 +56,8 @@ namespace malds_yt_downloader
             double bytesIn = double.Parse(e.BytesReceived.ToString());
             double totalBytes = double.Parse(e.TotalBytesToReceive.ToString());
             double percentage = bytesIn / totalBytes * 100;
-            label2.Content = "Downloaded " + e.BytesReceived + " of " + e.TotalBytesToReceive;
-            progressBar1.Value = int.Parse(Math.Truncate(percentage).ToString());
-            label3.Content = int.Parse(Math.Truncate(percentage).ToString());
             videoTask[videoTask.Count - 1].Progress = int.Parse(Math.Truncate(percentage).ToString()).ToString() + "%";
-            VideoDataGrid.ItemsSource = videoTask;
+            VideoDataGrid.Dispatcher.BeginInvoke(new Action(() => VideoDataGrid.Items.Refresh()), System.Windows.Threading.DispatcherPriority.Background);
         }
 
         void client_DownloadFileCompleted(object sender, AsyncCompletedEventArgs e)
@@ -68,7 +65,7 @@ namespace malds_yt_downloader
             label2.Content = "Completed";
             videoTask[videoTask.Count - 1].Progress = "Завантажено";
             videoTask[videoTask.Count - 1].Status = DownloadType.Completed;
-            VideoDataGrid.ItemsSource = videoTask;
+            VideoDataGrid.Dispatcher.BeginInvoke(new Action(() => VideoDataGrid.Items.Refresh()), System.Windows.Threading.DispatcherPriority.Background);
         }
 
 
