@@ -37,6 +37,8 @@ namespace malds_yt_downloader
     {
         ObservableCollection<DownloadTask> videoTask
                 = new ObservableCollection<DownloadTask>();
+
+        bool isDownloadingInProgress = false;
         
         string dataFile = "data.bin";
         string configFile = "config.bin";
@@ -44,11 +46,10 @@ namespace malds_yt_downloader
         private void startDownload(string urlToDownload)
         {
             WebClient client = new WebClient();
-
+            isDownloadingInProgress = true;
             client.DownloadProgressChanged += new DownloadProgressChangedEventHandler(client_DownloadProgressChanged);
             client.DownloadFileCompleted += new AsyncCompletedEventHandler(client_DownloadFileCompleted);
             client.DownloadFileAsync(new Uri(urlToDownload), "video.mp4");
-            VideoDataGrid.ItemsSource = videoTask;
         }
 
         void client_DownloadProgressChanged(object sender, DownloadProgressChangedEventArgs e)
@@ -57,17 +58,83 @@ namespace malds_yt_downloader
             double totalBytes = double.Parse(e.TotalBytesToReceive.ToString());
             double percentage = bytesIn / totalBytes * 100;
             videoTask[videoTask.Count - 1].Progress = int.Parse(Math.Truncate(percentage).ToString()).ToString() + "%";
-            VideoDataGrid.Dispatcher.BeginInvoke(new Action(() => VideoDataGrid.Items.Refresh()), System.Windows.Threading.DispatcherPriority.Background);
+            UpdateDataGrid();
         }
 
         void client_DownloadFileCompleted(object sender, AsyncCompletedEventArgs e)
         {
-            label2.Content = "Completed";
             videoTask[videoTask.Count - 1].Progress = "Завантажено";
             videoTask[videoTask.Count - 1].Status = DownloadType.Completed;
+            isDownloadingInProgress = false;
+            UpdateDataGrid();
+        }
+
+        public void UpdateDataGrid()
+        {
             VideoDataGrid.Dispatcher.BeginInvoke(new Action(() => VideoDataGrid.Items.Refresh()), System.Windows.Threading.DispatcherPriority.Background);
         }
 
+        public int? MaxDownloadQueueNumber()
+        {
+            int maxDownloadQueue = 0;
+            for (int i = 0; i < videoTask.Count; i++)
+            {
+                if (maxDownloadQueue < videoTask[i].DownloadQueue)
+                {
+                    if (videoTask[i].DownloadQueue != null)
+                    {
+                        maxDownloadQueue = (int)videoTask[i].DownloadQueue;
+                    }
+                }
+            }
+            if (maxDownloadQueue != 0)
+            {
+                return maxDownloadQueue;
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+        public int? NextDownloadQueueIndex()
+        {
+            int minDownloadQueue = int.MaxValue;
+            int minIndex = -1;
+            for (int i = 0; i < videoTask.Count; i++)
+            {
+                if (minDownloadQueue > videoTask[i].DownloadQueue)
+                {
+                    if (videoTask[i].DownloadQueue != null)
+                    {
+                        minDownloadQueue = (int) videoTask[i].DownloadQueue;
+                    }
+                    minIndex = i;
+                }
+            }
+            if (minIndex != -1)
+            {
+                return minIndex;
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+        public void DeleteDownloadQueue(int DownloadQueueNumber)
+        {
+            if (videoTask[DownloadQueueNumber].DownloadQueue != null)
+            {
+                for (int i = 0; i < videoTask.Count; i++)
+                {
+                    if (videoTask[i].DownloadQueue > videoTask[DownloadQueueNumber].DownloadQueue)
+                    {
+                        videoTask[i].DownloadQueue -= 1;
+                    }
+                }
+            }
+        }
 
     public MainWindow()
         {
@@ -75,17 +142,13 @@ namespace malds_yt_downloader
             VideoDataGrid.ItemsSource = videoTask;
         }
 
-        
-
         public async void VideoAddButton_Click(object sender, RoutedEventArgs e)
         {
             var youtube = new YoutubeClient();
             var video = await youtube.Videos.GetAsync(VideoUrlTextBox.Text);
-
             var streamManifest = await youtube.Videos.Streams.GetManifestAsync(VideoUrlTextBox.Text);
 
             DownloadTask addTask = new DownloadTask();
-
             addTask.Title = video.Title;
             addTask.Description = video.Description;
             addTask.Author = video.Author.ChannelTitle;
@@ -115,16 +178,27 @@ namespace malds_yt_downloader
                 }
             }
 
+            if (videoTask.Count > 0)
+            {
+                for (int i = 0; i < videoTask.Count; i++)
+                {
+                    addTask.DownloadQueue = MaxDownloadQueueNumber() + 1;
+                }
+            }
+            else
+            {
+                addTask.DownloadQueue = 1;
+            }
 
-            addTask.Status = DownloadType.InProgress;
-            
             videoTask.Add(addTask);
 
-            VideoUrlTextBox.Text = "";
+            addTask.Status = DownloadType.InProgress;
 
-            startDownload(addTask.VideoUrl);
+            Console.WriteLine("Hi!");
 
-            VideoDataGrid.ItemsSource = videoTask;
+            label1.Content = MaxDownloadQueueNumber();
+            label2.Content = NextDownloadQueueIndex();
+
 
 
 
@@ -174,7 +248,7 @@ namespace malds_yt_downloader
 
             */
 
-
+            VideoUrlTextBox.Text = "";
         }
 
         
@@ -188,8 +262,10 @@ namespace malds_yt_downloader
         {
             if (VideoDataGrid.SelectedIndex != -1)
             {
+                DeleteDownloadQueue(VideoDataGrid.SelectedIndex);
                 videoTask.RemoveAt(VideoDataGrid.SelectedIndex);
             }
+            UpdateDataGrid();
         }
 
         private void DeleteAllButton_Click(object sender, RoutedEventArgs e)
@@ -284,6 +360,16 @@ namespace malds_yt_downloader
             {
                 File.Create(configFile);
             }
+
+        }
+
+        private void StartDownloadButton_Click(object sender, RoutedEventArgs e)
+        {
+            
+        }
+
+        private void PauseDownloadButton_Click(object sender, RoutedEventArgs e)
+        {
 
         }
     }

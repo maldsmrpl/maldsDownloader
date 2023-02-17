@@ -16,7 +16,7 @@
                 </Grid.RowDefinitions>
                 <StackPanel Orientation="Horizontal" Margin="4,4,4,4">
                     <Button x:Name="VideoAddButton" Content="Додати" Margin="4,4,4,4" Padding="6,1,6,1" Click="VideoAddButton_Click"/>
-                    <TextBox x:Name="VideoUrlTextBox" TextWrapping="Wrap" Width="600" Margin="4,4,4,4" VerticalContentAlignment="Center" FontSize="16" FontStyle="Italic" Text="https://youtube.com/" MouseLeftButtonDown="VideoUrlTextBox_MouseLeftButtonDown" GotFocus="VideoUrlTextBox_GotFocus"/>
+                    <TextBox x:Name="VideoUrlTextBox" TextWrapping="Wrap" Width="550" Margin="4,4,4,4" VerticalContentAlignment="Center" FontSize="16" FontStyle="Italic" Text="https://youtube.com/" MouseLeftButtonDown="VideoUrlTextBox_MouseLeftButtonDown" GotFocus="VideoUrlTextBox_GotFocus"/>
                     <ComboBox x:Name="VideoQualityComboBox" Width="70" Margin="4,4,2,4" SelectedIndex="0" SnapsToDevicePixels="True" FontSize="16" VerticalContentAlignment="Center" HorizontalContentAlignment="Center">
                         <ComboBoxItem Content="360p"/>
                         <ComboBoxItem Content="720p"/>
@@ -26,7 +26,13 @@
                 <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="4,4,4,4">
                     <Button x:Name="DeleteButton" Content="Видалити" Margin="4,4,4,4" Padding="4,1,4,1" Click="DeleteButton_Click"/>
                     <Button x:Name="DeleteAllButton" Content="Видалити всі" Margin="4,4,4,4" Padding="4,1,4,1" Click="DeleteAllButton_Click"/>
-                    <ProgressBar x:Name="progressBar1" Height="10" Width="100"/>
+                    <Separator Width="25"/>
+                    <Button x:Name="QueueLevelUp" Content="Підняти пріоритет" Margin="4,4,4,4"/>
+                    <Button x:Name="QueueLevelDown" Content="Опустити пріоритет" Margin="4,4,4,4" HorizontalContentAlignment="Center"/>
+                    <Separator Width="25"/>
+                    <Button x:Name="StartDownloadButton" Content="Розпочати завантаження" Margin="4,4,4,4" Click="StartDownloadButton_Click"/>
+                    <Button x:Name="PauseDownloadButton" Content="Пауза завантаження" Margin="4,4,4,4" Click="PauseDownloadButton_Click"/>
+                    <Label x:Name="label1" Content="Label"/>
                     <Label x:Name="label2" Content="Label"/>
                 </StackPanel>
                 <DataGrid x:Name="VideoDataGrid" Grid.Row="1" IsSynchronizedWithCurrentItem="True" SelectedIndex="-1" TabIndex="2147483639" AutoGenerateColumns="False" CanUserDeleteRows="False" CanUserAddRows="False" IsReadOnly="True" Loaded="VideoDataGrid_Loaded" MouseDoubleClick="VideoDataGrid_MouseDoubleClick">
@@ -34,7 +40,7 @@
                         <InputBindingCollection/>
                     </DataGrid.ItemsSource>
                     <DataGrid.Columns>
-                        <DataGridTextColumn Header="#" Binding="{Binding Id}"/>
+                        <DataGridTextColumn Header="#" Binding="{Binding DownloadQueue}"/>
                         <DataGridTextColumn Header="Коли додано" Binding="{Binding UploadDateString}"/>
                         <DataGridTextColumn Header="Назва" Binding="{Binding Title}" MaxWidth="350"/>
                         <DataGridTextColumn Header="Якість" Binding="{Binding Quality}"/>
@@ -44,7 +50,6 @@
                         <DataGridTextColumn Header="Статус" Binding="{Binding Progress}"/>
                     </DataGrid.Columns>
                 </DataGrid>
-                <Label x:Name="label3" Content="Label" HorizontalAlignment="Left" Margin="371,0,0,0" Grid.Row="2" VerticalAlignment="Center"/>
             </Grid>
         </TabItem>
         <TabItem x:Name="PlaylistTab" Header="Playlist" HorizontalAlignment="Center" Height="20" VerticalAlignment="Center" Width="54">

@@ -24,9 +24,7 @@ namespace malds_yt_downloader
         public DateTime UploadDate { get; set;}
         public string UploadDateString { get; set; }
         public string Progress { get; set; }
-
-
-
+        public int? DownloadQueue { get; set; }
 
     }
 }
