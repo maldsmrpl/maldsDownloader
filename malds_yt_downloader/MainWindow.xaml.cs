@@ -39,17 +39,28 @@ namespace malds_yt_downloader
                 = new ObservableCollection<DownloadTask>();
 
         bool isDownloadingInProgress = false;
-        
+        bool isDownloadPaused = false;
+
         string dataFile = "data.bin";
         string configFile = "config.bin";
 
-        private void startDownload(string urlToDownload)
+        private void StartDownload(string urlToDownload, string filePath, string fileName)
         {
-            WebClient client = new WebClient();
-            isDownloadingInProgress = true;
-            client.DownloadProgressChanged += new DownloadProgressChangedEventHandler(client_DownloadProgressChanged);
-            client.DownloadFileCompleted += new AsyncCompletedEventHandler(client_DownloadFileCompleted);
-            client.DownloadFileAsync(new Uri(urlToDownload), "video.mp4");
+            if (!isDownloadingInProgress)
+            {
+                try
+                {
+                    isDownloadingInProgress = true;
+                    WebClient client = new WebClient();
+                    client.DownloadProgressChanged += new DownloadProgressChangedEventHandler(client_DownloadProgressChanged);
+                    client.DownloadFileCompleted += new AsyncCompletedEventHandler(client_DownloadFileCompleted);
+                    client.DownloadFileAsync(new Uri(urlToDownload), filePath + fileName);
+                }
+                catch (Exception err)
+                { 
+                    MessageBox.Show($"Download error - {err.Message} \n \n Please try later"); 
+                }
+            }
         }
 
         void client_DownloadProgressChanged(object sender, DownloadProgressChangedEventArgs e)
@@ -57,21 +68,77 @@ namespace malds_yt_downloader
             double bytesIn = double.Parse(e.BytesReceived.ToString());
             double totalBytes = double.Parse(e.TotalBytesToReceive.ToString());
             double percentage = bytesIn / totalBytes * 100;
-            videoTask[videoTask.Count - 1].Progress = int.Parse(Math.Truncate(percentage).ToString()).ToString() + "%";
+            videoTask[IndexOfFirstItem()].Progress = int.Parse(Math.Truncate(percentage).ToString()).ToString() + "%";
             UpdateDataGrid();
         }
 
         void client_DownloadFileCompleted(object sender, AsyncCompletedEventArgs e)
         {
-            videoTask[videoTask.Count - 1].Progress = "Завантажено";
-            videoTask[videoTask.Count - 1].Status = DownloadType.Completed;
+            videoTask[IndexOfFirstItem()].Progress = "Завантажено";
+            videoTask[IndexOfFirstItem()].Status = DownloadType.Completed;
+            DeleteDownloadQueue(IndexOfFirstItem());
             isDownloadingInProgress = false;
+            StartNextDownload();
             UpdateDataGrid();
         }
 
         public void UpdateDataGrid()
         {
             VideoDataGrid.Dispatcher.BeginInvoke(new Action(() => VideoDataGrid.Items.Refresh()), System.Windows.Threading.DispatcherPriority.Background);
+        }
+
+        public void StartNextDownload()
+        {
+            if (videoTask.Count >= 0)
+            {
+                isDownloadPaused = false;
+
+                if (DownloadPathTextBox.Text[DownloadPathTextBox.Text.Length - 1] != '\\')
+                {
+                    DownloadPathTextBox.Text = DownloadPathTextBox.Text + '\\';
+                }
+
+                if (!Directory.Exists(DownloadPathTextBox.Text))
+                {
+                    Directory.CreateDirectory(DownloadPathTextBox.Text);
+                }
+
+                for (int i = 0; i < videoTask.Count; i++)
+                {
+                    if (videoTask[i].DownloadQueue == 1)
+                    {
+                        string pathDevidedByAuthors = DownloadPathTextBox.Text + FileNameWithAccaptableCharacters(videoTask[i].Author) + '\\';
+
+                        if (!Directory.Exists(pathDevidedByAuthors))
+                        {
+                            Directory.CreateDirectory(pathDevidedByAuthors);
+                        }
+                        StartDownload(videoTask[i].VideoUrl, pathDevidedByAuthors, videoTask[i].FileName);
+                    }
+                }
+            }
+        }
+
+        public int IndexOfFirstItem()
+        {
+            for (int i = 0; i < videoTask.Count; i++)
+            {
+                if (videoTask[i].DownloadQueue == 1)
+                {
+                    return i;
+                }
+            }
+            return -1;
+        }
+
+        public string FileNameWithAccaptableCharacters(string path)
+        {
+            List<char> charsToRemove = new List<char>() { '\\', '/', ':', '*', '?', '\"', '<', '>', '|' };
+            foreach (char c in charsToRemove)
+            {
+                path = path.Replace(c.ToString(), String.Empty);
+            }
+            return path;
         }
 
         public int? MaxDownloadQueueNumber()
@@ -97,31 +164,6 @@ namespace malds_yt_downloader
             }
         }
 
-        public int? NextDownloadQueueIndex()
-        {
-            int minDownloadQueue = int.MaxValue;
-            int minIndex = -1;
-            for (int i = 0; i < videoTask.Count; i++)
-            {
-                if (minDownloadQueue > videoTask[i].DownloadQueue)
-                {
-                    if (videoTask[i].DownloadQueue != null)
-                    {
-                        minDownloadQueue = (int) videoTask[i].DownloadQueue;
-                    }
-                    minIndex = i;
-                }
-            }
-            if (minIndex != -1)
-            {
-                return minIndex;
-            }
-            else
-            {
-                return null;
-            }
-        }
-
         public void DeleteDownloadQueue(int DownloadQueueNumber)
         {
             if (videoTask[DownloadQueueNumber].DownloadQueue != null)
@@ -133,6 +175,7 @@ namespace malds_yt_downloader
                         videoTask[i].DownloadQueue -= 1;
                     }
                 }
+                videoTask[DownloadQueueNumber].DownloadQueue = null;
             }
         }
 
@@ -144,114 +187,70 @@ namespace malds_yt_downloader
 
         public async void VideoAddButton_Click(object sender, RoutedEventArgs e)
         {
-            var youtube = new YoutubeClient();
-            var video = await youtube.Videos.GetAsync(VideoUrlTextBox.Text);
-            var streamManifest = await youtube.Videos.Streams.GetManifestAsync(VideoUrlTextBox.Text);
-
-            DownloadTask addTask = new DownloadTask();
-            addTask.Title = video.Title;
-            addTask.Description = video.Description;
-            addTask.Author = video.Author.ChannelTitle;
-            addTask.YouTubeUrl = video.Url;
-            addTask.Thumb = video.Thumbnails.GetWithHighestResolution().Url;
-            addTask.Duration = video.Duration.ToString();
-            addTask.YouTubeUrl = video.Url.ToString();
-            addTask.UploadDate = video.UploadDate.Date;
-            addTask.UploadDateString = addTask.UploadDate.ToString("yyyy-MM-dd");
-
-            if (VideoQualityComboBox.SelectedIndex == 0)
+            try
             {
-                addTask.Quality = "360p";
-            }
-            else
-            {
-                addTask.Quality = "720p";
-            }
+                var youtube = new YoutubeClient();
+                var video = await youtube.Videos.GetAsync(VideoUrlTextBox.Text);
+                var streamManifest = await youtube.Videos.Streams.GetManifestAsync(VideoUrlTextBox.Text);
 
-            for (int i = 0; i < streamManifest.GetMuxedStreams().Count(); i++)
-            {
-                if (streamManifest.GetMuxedStreams().GetItemByIndex(i).VideoQuality.Label == addTask.Quality)
+                DownloadTask addTask = new DownloadTask();
+                addTask.Title = video.Title;
+                addTask.Description = video.Description;
+                addTask.Author = video.Author.ChannelTitle;
+                addTask.YouTubeUrl = video.Url;
+                addTask.Thumb = video.Thumbnails.GetWithHighestResolution().Url;
+                addTask.Duration = video.Duration.ToString();
+                addTask.YouTubeUrl = video.Url.ToString();
+                addTask.UploadDate = video.UploadDate.Date;
+                addTask.UploadDateString = addTask.UploadDate.ToString("yyyy-MM-dd");
+
+                if (VideoQualityComboBox.SelectedIndex == 0)
                 {
-                    addTask.VideoUrl = streamManifest.GetMuxedStreams().GetItemByIndex(i).Url;
-                    addTask.SizeByteTotal = streamManifest.GetMuxedStreams().GetItemByIndex(i).Size.Bytes;
-                    addTask.SizeToDisplay = $"{String.Format("{0:0.00}", (((double)addTask.SizeByteTotal / 1024) / 1024))} мб";
+                    addTask.Quality = "360p";
                 }
-            }
-
-            if (videoTask.Count > 0)
-            {
-                for (int i = 0; i < videoTask.Count; i++)
+                else
                 {
-                    addTask.DownloadQueue = MaxDownloadQueueNumber() + 1;
+                    addTask.Quality = "720p";
                 }
+
+                for (int i = 0; i < streamManifest.GetMuxedStreams().Count(); i++)
+                {
+                    if (streamManifest.GetMuxedStreams().GetItemByIndex(i).VideoQuality.Label == addTask.Quality)
+                    {
+                        addTask.VideoUrl = streamManifest.GetMuxedStreams().GetItemByIndex(i).Url;
+                        addTask.SizeByteTotal = streamManifest.GetMuxedStreams().GetItemByIndex(i).Size.Bytes;
+                        addTask.SizeToDisplay = $"{String.Format("{0:0.00}", (((double)addTask.SizeByteTotal / 1024) / 1024))} мб";
+                        addTask.Container = streamManifest.GetMuxedStreams().GetItemByIndex(i).Container.ToString();
+                    }
+                }
+
+                if (videoTask.Count > 0)
+                {
+                    for (int i = 0; i < videoTask.Count; i++)
+                    {
+                        addTask.DownloadQueue = MaxDownloadQueueNumber() + 1;
+                    }
+                }
+                else
+                {
+                    addTask.DownloadQueue = 1;
+                }
+
+                addTask.FileName = FileNameWithAccaptableCharacters($"{addTask.UploadDateString} - {addTask.Author} - {addTask.Title} - ({addTask.Quality}).{addTask.Container}");
+
+                videoTask.Add(addTask);
+
+                addTask.Status = DownloadType.InProgress;
             }
-            else
+            catch (Exception err)
             {
-                addTask.DownloadQueue = 1;
+                MessageBox.Show($"Adding error - {err.Message} \n \n Please try later");
             }
-
-            videoTask.Add(addTask);
-
-            addTask.Status = DownloadType.InProgress;
-
-            Console.WriteLine("Hi!");
-
-            label1.Content = MaxDownloadQueueNumber();
-            label2.Content = NextDownloadQueueIndex();
-
-
-
-
-
-
-
-
-            /*
-            BitmapImage thumbImage = new BitmapImage();
-            thumbImage.BeginInit();
-            thumbImage.UriSource = new Uri(video.Thumbnails.TryGetWithHighestResolution().Url, UriKind.RelativeOrAbsolute);
-            thumbImage.EndInit();
-            //myImage.Source = thumbImage;
-
-            var streamManifest = await youtube.Videos.Streams.GetManifestAsync(VideoUrlTextBox.Text);
-            var streamInfo = streamManifest.GetMuxedStreams().GetWithHighestVideoQuality();
-
-
-
-            var tests = streamManifest.GetMuxedStreams();
-
-            //test.Content = tests.GetItemByIndex(1);
-
-
-
-
-
-
-            List<char> charsToRemove = new List<char>() { '\\', '/', ':', '*', '?', '\"', '<', '>', '|' };
-            foreach (char c in charsToRemove)
+            finally
             {
-                title = title.Replace(c.ToString(), String.Empty);
+                VideoUrlTextBox.Text = "";
             }
-
-            IProgress<double> progress = new Progress<double>();
-
-
-
-
-
-            await youtube.Videos.Streams.DownloadAsync(
-                streamInfo,
-                $"{video.UploadDate.ToString("yyyy-MM-dd")}_{video.Author}_{title}.{streamInfo.Container}");
-
-
-            // FileInfo fi = new FileInfo($"{video.UploadDate.ToString("yyyy-MM-dd")}_{video.Author}_{video.Title}.{streamInfo.Container}");
-
-            */
-
-            VideoUrlTextBox.Text = "";
         }
-
-        
 
         private void VideoDataGrid_Loaded(object sender, RoutedEventArgs e)
         {
@@ -365,12 +364,12 @@ namespace malds_yt_downloader
 
         private void StartDownloadButton_Click(object sender, RoutedEventArgs e)
         {
-            
+            StartNextDownload();
         }
 
         private void PauseDownloadButton_Click(object sender, RoutedEventArgs e)
         {
-
+            isDownloadPaused = true;
         }
     }
 }

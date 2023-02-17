@@ -25,6 +25,8 @@ namespace malds_yt_downloader
         public string UploadDateString { get; set; }
         public string Progress { get; set; }
         public int? DownloadQueue { get; set; }
+        public string FileName { get; set; }
+        public string Container { get; set; }
 
     }
 }

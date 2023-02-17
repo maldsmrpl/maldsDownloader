@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:malds_yt_downloader"
         mc:Ignorable="d"
-        Title="malds_yt_downloader" Height="450" Width="800" Closed="Window_Closed" Loaded="Window_Loaded">
+        Title="malds_yt_downloader" Height="450" Width="900" Closed="Window_Closed" Loaded="Window_Loaded">
     <TabControl>
         <TabItem x:Name="VideoTab" Header="Video" HorizontalAlignment="Center" Height="20" VerticalAlignment="Center" Width="54">
             <Grid Background="#FFE5E5E5">
@@ -32,8 +32,6 @@
                     <Separator Width="25"/>
                     <Button x:Name="StartDownloadButton" Content="Розпочати завантаження" Margin="4,4,4,4" Click="StartDownloadButton_Click"/>
                     <Button x:Name="PauseDownloadButton" Content="Пауза завантаження" Margin="4,4,4,4" Click="PauseDownloadButton_Click"/>
-                    <Label x:Name="label1" Content="Label"/>
-                    <Label x:Name="label2" Content="Label"/>
                 </StackPanel>
                 <DataGrid x:Name="VideoDataGrid" Grid.Row="1" IsSynchronizedWithCurrentItem="True" SelectedIndex="-1" TabIndex="2147483639" AutoGenerateColumns="False" CanUserDeleteRows="False" CanUserAddRows="False" IsReadOnly="True" Loaded="VideoDataGrid_Loaded" MouseDoubleClick="VideoDataGrid_MouseDoubleClick">
                     <DataGrid.ItemsSource>
@@ -59,7 +57,9 @@
             <Grid Background="#FFE5E5E5"/>
         </TabItem>
         <TabItem x:Name="SettingsTab" HorizontalAlignment="Center" Height="20" Header="Settings" VerticalAlignment="Center" Width="54">
-            <Grid Background="#FFE5E5E5"/>
+            <Grid Background="#FFE5E5E5">
+                <TextBox x:Name="DownloadPathTextBox" HorizontalAlignment="Left" Margin="68,81,0,0" TextWrapping="Wrap" Text="D:\My Documents\Downloads\malds_yt_downloader" VerticalAlignment="Top" Width="465"/>
+            </Grid>
         </TabItem>
     </TabControl>
 </Window>
