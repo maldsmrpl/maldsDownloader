@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:malds_yt_downloader"
         mc:Ignorable="d"
-        Title="malds_yt_downloader" Height="450" Width="900" Closed="Window_Closed" Loaded="Window_Loaded">
+        Title="malds_yt_downloader" Height="450" Width="900" Closed="Window_Closed" Loaded="Window_Loaded" KeyDown="Window_KeyDown">
     <TabControl>
         <TabItem x:Name="VideoTab" Header="Video" HorizontalAlignment="Center" Height="20" VerticalAlignment="Center" Width="54">
             <Grid Background="#FFE5E5E5">

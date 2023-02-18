@@ -39,7 +39,7 @@ namespace malds_yt_downloader
                 = new ObservableCollection<DownloadTask>();
 
         bool isDownloadingInProgress = false;
-        bool isDownloadPaused = false;
+        bool isDownloadingPaused = false;
 
         string dataFile = "data.bin";
         string configFile = "config.bin";
@@ -68,7 +68,7 @@ namespace malds_yt_downloader
             double bytesIn = double.Parse(e.BytesReceived.ToString());
             double totalBytes = double.Parse(e.TotalBytesToReceive.ToString());
             double percentage = bytesIn / totalBytes * 100;
-            videoTask[IndexOfFirstItem()].Progress = int.Parse(Math.Truncate(percentage).ToString()).ToString() + "%";
+            videoTask[IndexOfFirstItem()].Progress = $"{String.Format("{0:0.0}", percentage)}%";
             UpdateDataGrid();
         }
 
@@ -91,7 +91,7 @@ namespace malds_yt_downloader
         {
             if (videoTask.Count >= 0)
             {
-                isDownloadPaused = false;
+                isDownloadingPaused = false;
 
                 if (DownloadPathTextBox.Text[DownloadPathTextBox.Text.Length - 1] != '\\')
                 {
@@ -108,6 +108,7 @@ namespace malds_yt_downloader
                     if (videoTask[i].DownloadQueue == 1)
                     {
                         string pathDevidedByAuthors = DownloadPathTextBox.Text + FileNameWithAccaptableCharacters(videoTask[i].Author) + '\\';
+                        videoTask[i].FilePath = pathDevidedByAuthors;
 
                         if (!Directory.Exists(pathDevidedByAuthors))
                         {
@@ -224,23 +225,26 @@ namespace malds_yt_downloader
                     }
                 }
 
-                if (videoTask.Count > 0)
+                int unFinishedConter = 0;
+                for (int i = 0; i < videoTask.Count; i++)
                 {
-                    for (int i = 0; i < videoTask.Count; i++)
+                    if (videoTask[i].DownloadQueue != null)
                     {
-                        addTask.DownloadQueue = MaxDownloadQueueNumber() + 1;
+                        unFinishedConter++;
                     }
                 }
-                else
-                {
-                    addTask.DownloadQueue = 1;
-                }
+                addTask.DownloadQueue = unFinishedConter + 1;
 
                 addTask.FileName = FileNameWithAccaptableCharacters($"{addTask.UploadDateString} - {addTask.Author} - {addTask.Title} - ({addTask.Quality}).{addTask.Container}");
 
                 videoTask.Add(addTask);
 
                 addTask.Status = DownloadType.InProgress;
+
+                if (!isDownloadingInProgress && !isDownloadingPaused)
+                {
+                    StartNextDownload();
+                }
             }
             catch (Exception err)
             {
@@ -249,6 +253,7 @@ namespace malds_yt_downloader
             finally
             {
                 VideoUrlTextBox.Text = "";
+                VideoUrlTextBox.Focus();
             }
         }
 
@@ -269,17 +274,22 @@ namespace malds_yt_downloader
 
         private void DeleteAllButton_Click(object sender, RoutedEventArgs e)
         {
-            for (int i = 0; i < videoTask.Count; i++)
+            if (!isDownloadingInProgress && !isDownloadingPaused)
             {
-                if (videoTask[i].Status == DownloadType.InProgress)
+                videoTask.Clear();
+            }
+            else
+            {
+                for (int i = 0; i < videoTask.Count; i++)
                 {
-                    continue;
-                }
-                else
-                {
-                    videoTask.RemoveAt(i);
+                    if (videoTask[i].DownloadQueue != 1)
+                    {
+                        videoTask.RemoveAt(i);
+                        i = 0;
+                    }
                 }
             }
+            UpdateDataGrid();
         }
 
         private void VideoUrlTextBox_GotFocus(object sender, RoutedEventArgs e)
@@ -369,7 +379,15 @@ namespace malds_yt_downloader
 
         private void PauseDownloadButton_Click(object sender, RoutedEventArgs e)
         {
-            isDownloadPaused = true;
+            isDownloadingPaused = true;
+        }
+
+        private void Window_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter)
+            {
+                VideoAddButton_Click(sender, e);
+            }
         }
     }
 }
