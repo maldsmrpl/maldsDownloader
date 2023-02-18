@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace malds_yt_downloader
 {
-    public enum DownloadType
+    public enum Status
     {
         Completed,
         InProgress,

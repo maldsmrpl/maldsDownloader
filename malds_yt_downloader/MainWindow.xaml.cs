@@ -52,8 +52,10 @@ namespace malds_yt_downloader
                 {
                     isDownloadingInProgress = true;
                     WebClient client = new WebClient();
-                    client.DownloadProgressChanged += new DownloadProgressChangedEventHandler(client_DownloadProgressChanged);
-                    client.DownloadFileCompleted += new AsyncCompletedEventHandler(client_DownloadFileCompleted);
+                    client.DownloadProgressChanged 
+                        += new DownloadProgressChangedEventHandler(client_DownloadProgressChanged);
+                    client.DownloadFileCompleted 
+                        += new AsyncCompletedEventHandler(client_DownloadFileCompleted);
                     client.DownloadFileAsync(new Uri(urlToDownload), filePath + fileName);
                 }
                 catch (Exception err)
@@ -75,7 +77,7 @@ namespace malds_yt_downloader
         void client_DownloadFileCompleted(object sender, AsyncCompletedEventArgs e)
         {
             videoTask[IndexOfFirstItem()].Progress = "Завантажено";
-            videoTask[IndexOfFirstItem()].Status = DownloadType.Completed;
+            videoTask[IndexOfFirstItem()].Status = Status.Completed;
             DeleteDownloadQueue(IndexOfFirstItem());
             isDownloadingInProgress = false;
             StartNextDownload();
@@ -84,7 +86,8 @@ namespace malds_yt_downloader
 
         public void UpdateDataGrid()
         {
-            VideoDataGrid.Dispatcher.BeginInvoke(new Action(() => VideoDataGrid.Items.Refresh()), System.Windows.Threading.DispatcherPriority.Background);
+            VideoDataGrid.Dispatcher.BeginInvoke(new Action(() 
+                => VideoDataGrid.Items.Refresh()), System.Windows.Threading.DispatcherPriority.Background);
         }
 
         public void StartNextDownload()
@@ -120,6 +123,15 @@ namespace malds_yt_downloader
             }
         }
 
+        public static void OpenWithDefaultProgram(string path)
+        {
+            using Process fileopener = new Process();
+
+            fileopener.StartInfo.FileName = "explorer";
+            fileopener.StartInfo.Arguments = "\"" + path + "\"";
+            fileopener.Start();
+        }
+
         public int IndexOfFirstItem()
         {
             for (int i = 0; i < videoTask.Count; i++)
@@ -140,29 +152,6 @@ namespace malds_yt_downloader
                 path = path.Replace(c.ToString(), String.Empty);
             }
             return path;
-        }
-
-        public int? MaxDownloadQueueNumber()
-        {
-            int maxDownloadQueue = 0;
-            for (int i = 0; i < videoTask.Count; i++)
-            {
-                if (maxDownloadQueue < videoTask[i].DownloadQueue)
-                {
-                    if (videoTask[i].DownloadQueue != null)
-                    {
-                        maxDownloadQueue = (int)videoTask[i].DownloadQueue;
-                    }
-                }
-            }
-            if (maxDownloadQueue != 0)
-            {
-                return maxDownloadQueue;
-            }
-            else
-            {
-                return null;
-            }
         }
 
         public void DeleteDownloadQueue(int DownloadQueueNumber)
@@ -235,11 +224,11 @@ namespace malds_yt_downloader
                 }
                 addTask.DownloadQueue = unFinishedConter + 1;
 
-                addTask.FileName = FileNameWithAccaptableCharacters($"{addTask.UploadDateString} - {addTask.Author} - {addTask.Title} - ({addTask.Quality}).{addTask.Container}");
+                addTask.FileName = FileNameWithAccaptableCharacters($"{addTask.UploadDateString} - {addTask.Title} - ({addTask.Quality}).{addTask.Container}");
 
                 videoTask.Add(addTask);
 
-                addTask.Status = DownloadType.InProgress;
+                addTask.Status = Status.InProgress;
 
                 if (!isDownloadingInProgress && !isDownloadingPaused)
                 {
@@ -304,6 +293,25 @@ namespace malds_yt_downloader
 
         private void VideoDataGrid_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
+            if (videoTask[VideoDataGrid.SelectedIndex].FilePath != null &&
+                videoTask[VideoDataGrid.SelectedIndex].FileName != null &&
+                videoTask[VideoDataGrid.SelectedIndex].Status == Status.Completed)
+            {
+                if (File.Exists(videoTask[VideoDataGrid.SelectedIndex].FilePath + 
+                    videoTask[VideoDataGrid.SelectedIndex].FileName))
+                {
+                    try
+                    {
+                        OpenWithDefaultProgram(videoTask[VideoDataGrid.SelectedIndex].FilePath +
+                    videoTask[VideoDataGrid.SelectedIndex].FileName);
+                    }
+                    catch
+                    {
+                        MessageBox.Show("File not found");
+                    }
+                }
+            }
+
             MessageBox.Show(videoTask[VideoDataGrid.SelectedIndex].Description);
         }
 

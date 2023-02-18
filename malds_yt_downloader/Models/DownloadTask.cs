@@ -20,7 +20,7 @@ namespace malds_yt_downloader
         public long SizeByteTotal { get; set; }
         public long SizeByteCurrent { get; set; }
         public string SizeToDisplay { get; set; }
-        public DownloadType Status { get; set; }
+        public Status Status { get; set; }
         public DateTime UploadDate { get; set;}
         public string UploadDateString { get; set; }
         public string Progress { get; set; }
