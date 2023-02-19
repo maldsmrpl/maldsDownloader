@@ -16,11 +16,7 @@
                 </Grid.RowDefinitions>
                 <StackPanel Orientation="Horizontal" Margin="4,4,4,4">
                     <Button x:Name="VideoAddButton" Content="Додати" Margin="4,4,4,4" Padding="6,1,6,1" Click="VideoAddButton_Click"/>
-                    <TextBox x:Name="VideoUrlTextBox" TextWrapping="Wrap" Width="550" Margin="4,4,4,4" VerticalContentAlignment="Center" FontSize="16" FontStyle="Italic" Text="https://youtube.com/" MouseLeftButtonDown="VideoUrlTextBox_MouseLeftButtonDown" GotFocus="VideoUrlTextBox_GotFocus"/>
-                    <ComboBox x:Name="VideoQualityComboBox" Width="70" Margin="4,4,2,4" SelectedIndex="0" SnapsToDevicePixels="True" FontSize="16" VerticalContentAlignment="Center" HorizontalContentAlignment="Center">
-                        <ComboBoxItem Content="360p"/>
-                        <ComboBoxItem Content="720p"/>
-                    </ComboBox>
+                    <TextBox x:Name="VideoUrlTextBox" TextWrapping="Wrap" Width="600" Margin="4,4,4,4" VerticalContentAlignment="Center" FontSize="16" FontStyle="Italic" Text="https://youtube.com/" MouseLeftButtonDown="VideoUrlTextBox_MouseLeftButtonDown" GotFocus="VideoUrlTextBox_GotFocus"/>
                 </StackPanel>
                 <StackPanel Grid.Row="1" Margin="4,4,4,4"/>
                 <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="4,4,4,4">
@@ -51,14 +47,54 @@
             </Grid>
         </TabItem>
         <TabItem x:Name="PlaylistTab" Header="Playlist" HorizontalAlignment="Center" Height="20" VerticalAlignment="Center" Width="54">
-            <Grid Background="#FFE5E5E5"/>
+            <Grid Background="#FFE5E5E5">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="49.517"/>
+                    <RowDefinition/>
+                    <RowDefinition Height="44.94"/>
+                </Grid.RowDefinitions>
+                <StackPanel Orientation="Horizontal" Margin="4,4,4,4">
+                    <Button x:Name="PlaylistAddButton" Content="Додати" Margin="4,4,4,4" Padding="6,1,6,1" Click="PlaylistAddButton_Click"/>
+                    <TextBox x:Name="PlaylistUrlTextBox" TextWrapping="Wrap" Width="600" VerticalContentAlignment="Center" FontSize="16" FontStyle="Italic" Text="https://youtube.com/" MouseLeftButtonDown="VideoUrlTextBox_MouseLeftButtonDown" GotFocus="VideoUrlTextBox_GotFocus" Margin="4,4,4,4"/>
+                </StackPanel>
+                <StackPanel Grid.Row="1">
+                    <DataGrid x:Name="PlaylistDataGrid" IsSynchronizedWithCurrentItem="True" SelectedIndex="-1" TabIndex="2147483639" AutoGenerateColumns="False" CanUserDeleteRows="False" CanUserAddRows="False" IsReadOnly="True" Loaded="VideoDataGrid_Loaded" MouseDoubleClick="VideoDataGrid_MouseDoubleClick" Height="304" Width="894">
+                        <DataGrid.ItemsSource>
+                            <InputBindingCollection/>
+                        </DataGrid.ItemsSource>
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="#" Binding="{Binding IsSelected}"/>
+                            <DataGridTextColumn Header="Коли додано" Binding="{Binding UploadDateString}"/>
+                            <DataGridTextColumn Header="Назва" Binding="{Binding Title}" MaxWidth="350"/>
+                            <DataGridTextColumn Header="Якість" Binding="{Binding Quality}"/>
+                            <DataGridTextColumn Header="Канал" Binding="{Binding Author}" MaxWidth="150"/>
+                            <DataGridTextColumn Header="Час" Binding="{Binding Duration}"/>
+                            <DataGridTextColumn Header="Розмір" Binding="{Binding SizeToDisplay}"/>
+                            <DataGridTextColumn Header="Статус" Binding="{Binding Progress}"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </StackPanel>
+                <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="4,4,4,4">
+                    <Button x:Name="AddSelectedVideosButton" Content="Завантажити виделене" Padding="6,1,6,4" Margin="4,4,4,4" Click="AddSelectedVideosButton_Click"/>
+                    <Button x:Name="ClearPlaylistButton" Content="Очистити список" Margin="4,4,4,4" Padding="6,1,6,1" ScrollViewer.CanContentScroll="True"/>
+                </StackPanel>
+            </Grid>
         </TabItem>
         <TabItem x:Name="ChannelTab" HorizontalAlignment="Center" Height="20" Header="Channel" VerticalAlignment="Center" Width="54">
             <Grid Background="#FFE5E5E5"/>
         </TabItem>
         <TabItem x:Name="SettingsTab" HorizontalAlignment="Center" Height="20" Header="Settings" VerticalAlignment="Center" Width="54">
             <Grid Background="#FFE5E5E5">
-                <TextBox x:Name="DownloadPathTextBox" HorizontalAlignment="Left" Margin="68,81,0,0" TextWrapping="Wrap" Text="D:\My Documents\Downloads\malds_yt_downloader" VerticalAlignment="Top" Width="465"/>
+                <TextBox x:Name="DownloadPathTextBox" HorizontalAlignment="Left" Margin="152,10,0,0" TextWrapping="Wrap" Text="D:\My Documents\Downloads\malds_yt_downloader" VerticalAlignment="Top" Width="465"/>
+                <TextBlock HorizontalAlignment="Left" Margin="33,12,0,0" TextWrapping="Wrap" Text="Куди завантажувати:" VerticalAlignment="Top"/>
+                <CheckBox Content="Зберігати в папки з назвами каналів" HorizontalAlignment="Left" Margin="33,44,0,0" VerticalAlignment="Top" IsChecked="True"/>
+                <CheckBox Content="Видаляти запис одразу після закінчення завантаження" HorizontalAlignment="Left" Margin="33,72,0,0" VerticalAlignment="Top"/>
+                <CheckBox Content="CheckBox" HorizontalAlignment="Left" Margin="33,100,0,0" VerticalAlignment="Top"/>
+                <ComboBox x:Name="VideoQualityComboBox" SelectedIndex="0" SnapsToDevicePixels="True" FontSize="16" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Margin="547,36,277,337">
+                    <ComboBoxItem Content="360p"/>
+                    <ComboBoxItem Content="720p"/>
+                </ComboBox>
+                <TextBlock HorizontalAlignment="Left" Margin="429,53,0,0" TextWrapping="Wrap" Text="Якість завантаження:" VerticalAlignment="Top"/>
             </Grid>
         </TabItem>
     </TabControl>

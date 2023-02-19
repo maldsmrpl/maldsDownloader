@@ -1,4 +1,5 @@
 ﻿using AngleSharp.Common;
+using Microsoft.VisualBasic;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -30,13 +31,14 @@ using static System.Net.Mime.MediaTypeNames;
 
 namespace malds_yt_downloader
 {
-    /// <summary>
-    /// Interaction logic for MainWindow.xaml
-    /// </summary>
     public partial class MainWindow : Window
     {
-        ObservableCollection<DownloadTask> videoTask
-                = new ObservableCollection<DownloadTask>();
+        ObservableCollection<DownloadTask> videoTask 
+            = new ObservableCollection<DownloadTask>();
+        ObservableCollection<DownloadTask> playlistTask 
+            = new ObservableCollection<DownloadTask>();
+        ObservableCollection<DownloadTask> channelTask
+            = new ObservableCollection<DownloadTask>();
 
         bool isDownloadingInProgress = false;
         bool isDownloadingPaused = false;
@@ -169,19 +171,26 @@ namespace malds_yt_downloader
             }
         }
 
-    public MainWindow()
+        public int AddToDownloadQueue (ObservableCollection<DownloadTask> collection)
         {
-            InitializeComponent();
-            VideoDataGrid.ItemsSource = videoTask;
+            int unFinishedConter = 0;
+            for (int i = 0; i < collection.Count; i++)
+            {
+                if (collection[i].DownloadQueue != null)
+                {
+                    unFinishedConter++;
+                }
+            }
+            return unFinishedConter + 1;
         }
 
-        public async void VideoAddButton_Click(object sender, RoutedEventArgs e)
+        public async void AddVideoToCollection(string url, ObservableCollection<DownloadTask> collection, bool shallIStartDownloading = false)
         {
             try
             {
                 var youtube = new YoutubeClient();
-                var video = await youtube.Videos.GetAsync(VideoUrlTextBox.Text);
-                var streamManifest = await youtube.Videos.Streams.GetManifestAsync(VideoUrlTextBox.Text);
+                var video = await youtube.Videos.GetAsync(url);
+                var streamManifest = await youtube.Videos.Streams.GetManifestAsync(url);
 
                 DownloadTask addTask = new DownloadTask();
                 addTask.Title = video.Title;
@@ -193,6 +202,7 @@ namespace malds_yt_downloader
                 addTask.YouTubeUrl = video.Url.ToString();
                 addTask.UploadDate = video.UploadDate.Date;
                 addTask.UploadDateString = addTask.UploadDate.ToString("yyyy-MM-dd");
+                addTask.IsSelected = true;
 
                 if (VideoQualityComboBox.SelectedIndex == 0)
                 {
@@ -214,26 +224,46 @@ namespace malds_yt_downloader
                     }
                 }
 
-                int unFinishedConter = 0;
-                for (int i = 0; i < videoTask.Count; i++)
+                addTask.FileName = FileNameWithAccaptableCharacters(
+                    $"{addTask.UploadDateString} - {addTask.Title} - ({addTask.Quality}).{addTask.Container}");
+
+                if (shallIStartDownloading)
                 {
-                    if (videoTask[i].DownloadQueue != null)
-                    {
-                        unFinishedConter++;
-                    }
+                    addTask.DownloadQueue = AddToDownloadQueue(videoTask);
                 }
-                addTask.DownloadQueue = unFinishedConter + 1;
-
-                addTask.FileName = FileNameWithAccaptableCharacters($"{addTask.UploadDateString} - {addTask.Title} - ({addTask.Quality}).{addTask.Container}");
-
-                videoTask.Add(addTask);
 
                 addTask.Status = Status.InProgress;
+
+                collection.Add(addTask);
 
                 if (!isDownloadingInProgress && !isDownloadingPaused)
                 {
                     StartNextDownload();
                 }
+            }
+            catch
+            {
+                MessageBox.Show("Adding error");
+            }
+            finally
+            {
+                UpdateDataGrid();
+            }
+            
+        }
+
+    public MainWindow()
+        {
+            InitializeComponent();
+            VideoDataGrid.ItemsSource = videoTask;
+        }
+
+        public void VideoAddButton_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                AddVideoToCollection(VideoUrlTextBox.Text, videoTask, true);
+                UpdateDataGrid();
             }
             catch (Exception err)
             {
@@ -343,7 +373,6 @@ namespace malds_yt_downloader
             {
                 File.Create(configFile);
             }
-
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
@@ -396,6 +425,43 @@ namespace malds_yt_downloader
             {
                 VideoAddButton_Click(sender, e);
             }
+        }
+
+        private async void PlaylistAddButton_Click(object sender, RoutedEventArgs err)
+        {
+            try
+            {
+                var youtube = new YoutubeClient();
+                var playlist = await youtube.Playlists.GetAsync(PlaylistUrlTextBox.Text);
+
+                await foreach (var batch in youtube.Playlists.GetVideoBatchesAsync(PlaylistUrlTextBox.Text))
+                {
+                    foreach (var video in batch.Items)
+                    {
+                        AddVideoToCollection(video.Url, playlistTask);
+                    }
+                }
+            }
+            catch { MessageBox.Show("Error of adding Playlist"); }
+            finally { PlaylistDataGrid.ItemsSource = playlistTask; }
+        }
+
+        private void AddSelectedVideosButton_Click(object sender, RoutedEventArgs e)
+        {
+            for (int i = 0; i < playlistTask.Count; i++)
+            {
+                if (playlistTask[i].IsSelected)
+                {
+                    playlistTask[i].DownloadQueue = AddToDownloadQueue(videoTask);
+                    videoTask.Add(playlistTask[i]);
+                    if (!isDownloadingInProgress || !isDownloadingPaused)
+                    {
+                        StartNextDownload();
+                    }
+                }
+            }
+            VideoTab.Focus();
+            playlistTask.Clear();
         }
     }
 }

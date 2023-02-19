@@ -18,7 +18,6 @@ namespace malds_yt_downloader
         public string Duration { get; set; }
         public string Quality { get; set; }
         public long SizeByteTotal { get; set; }
-        public long SizeByteCurrent { get; set; }
         public string SizeToDisplay { get; set; }
         public Status Status { get; set; }
         public DateTime UploadDate { get; set;}
@@ -28,6 +27,7 @@ namespace malds_yt_downloader
         public string FileName { get; set; }
         public string FilePath { get; set; }
         public string Container { get; set; }
+        public bool IsSelected { get; set; }
 
     }
 }
