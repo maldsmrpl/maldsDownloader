@@ -58,12 +58,16 @@
                     <TextBox x:Name="PlaylistUrlTextBox" TextWrapping="Wrap" Width="600" VerticalContentAlignment="Center" FontSize="16" FontStyle="Italic" Text="https://youtube.com/" MouseLeftButtonDown="VideoUrlTextBox_MouseLeftButtonDown" GotFocus="VideoUrlTextBox_GotFocus" Margin="4,4,4,4"/>
                 </StackPanel>
                 <StackPanel Grid.Row="1">
-                    <DataGrid x:Name="PlaylistDataGrid" IsSynchronizedWithCurrentItem="True" SelectedIndex="-1" TabIndex="2147483639" AutoGenerateColumns="False" CanUserDeleteRows="False" CanUserAddRows="False" IsReadOnly="True" Loaded="VideoDataGrid_Loaded" MouseDoubleClick="VideoDataGrid_MouseDoubleClick" Height="304" Width="894">
+                    <DataGrid x:Name="PlaylistDataGrid" IsSynchronizedWithCurrentItem="True" SelectedIndex="-1" TabIndex="2147483639" AutoGenerateColumns="False" CanUserDeleteRows="False" CanUserAddRows="False" IsReadOnly="False" Height="304" Width="894">
                         <DataGrid.ItemsSource>
                             <InputBindingCollection/>
                         </DataGrid.ItemsSource>
                         <DataGrid.Columns>
-                            <DataGridTextColumn Header="#" Binding="{Binding IsSelected}"/>
+                            <DataGridCheckBoxColumn Header="#" Binding="{Binding IsSelected}" IsReadOnly="False">
+                                <DataGridCheckBoxColumn.EditingElementStyle>
+                                    <Style/>
+                                </DataGridCheckBoxColumn.EditingElementStyle>
+                            </DataGridCheckBoxColumn>
                             <DataGridTextColumn Header="Коли додано" Binding="{Binding UploadDateString}"/>
                             <DataGridTextColumn Header="Назва" Binding="{Binding Title}" MaxWidth="350"/>
                             <DataGridTextColumn Header="Якість" Binding="{Binding Quality}"/>
