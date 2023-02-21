@@ -91,14 +91,15 @@
             <Grid Background="#FFE5E5E5">
                 <TextBox x:Name="DownloadPathTextBox" HorizontalAlignment="Left" Margin="152,10,0,0" TextWrapping="Wrap" Text="D:\My Documents\Downloads\malds_yt_downloader" VerticalAlignment="Top" Width="465"/>
                 <TextBlock HorizontalAlignment="Left" Margin="33,12,0,0" TextWrapping="Wrap" Text="Куди завантажувати:" VerticalAlignment="Top"/>
-                <CheckBox Content="Зберігати в папки з назвами каналів" HorizontalAlignment="Left" Margin="33,44,0,0" VerticalAlignment="Top" IsChecked="True"/>
+                <CheckBox x:Name="isFoldersByAuthorCheckBox" Content="Зберігати в папки з назвами каналів" HorizontalAlignment="Left" Margin="33,44,0,0" VerticalAlignment="Top" IsChecked="True"/>
                 <CheckBox Content="Видаляти запис одразу після закінчення завантаження" HorizontalAlignment="Left" Margin="33,72,0,0" VerticalAlignment="Top"/>
                 <CheckBox Content="CheckBox" HorizontalAlignment="Left" Margin="33,100,0,0" VerticalAlignment="Top"/>
-                <ComboBox x:Name="VideoQualityComboBox" SelectedIndex="0" SnapsToDevicePixels="True" FontSize="16" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Margin="547,36,277,337">
+                <ComboBox x:Name="VideoQualityComboBox" SelectedIndex="0" SnapsToDevicePixels="True" FontSize="16" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Margin="558,89,253,276">
                     <ComboBoxItem Content="360p"/>
                     <ComboBoxItem Content="720p"/>
                 </ComboBox>
-                <TextBlock HorizontalAlignment="Left" Margin="429,53,0,0" TextWrapping="Wrap" Text="Якість завантаження:" VerticalAlignment="Top"/>
+                <TextBlock HorizontalAlignment="Left" Margin="423,89,0,0" TextWrapping="Wrap" Text="Якість завантаження:" VerticalAlignment="Top" Height="41"/>
+                <Button x:Name="SaveSettingsButton" Content="Зберегти налаштування" HorizontalAlignment="Left" Margin="52,156,0,0" VerticalAlignment="Top" Click="SaveSettingsButton_Click"/>
             </Grid>
         </TabItem>
     </TabControl>

@@ -1,0 +1,14 @@
+{
+  "profiles": {
+    "malds_yt_downloader_bot": {
+      "commandName": "Project",
+      "commandLineArgs": "5900358190:AAFn6tFI4ORPxCJxZaQ909y20bSZcSTicyc",
+      "launchUrl": "5900358190:AAFn6tFI4ORPxCJxZaQ909y20bSZcSTicyc",
+      "environmentVariables": {
+        "api_id": "20722226",
+        "api_hash": "17bad8cbab51152bf2520ad33b63a7c2",
+        "phone_number": "+380675988428"
+      }
+    }
+  }
+}

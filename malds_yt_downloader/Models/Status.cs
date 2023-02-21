@@ -10,6 +10,7 @@ namespace malds_yt_downloader
     {
         Completed,
         InProgress,
-        Failed
+        Failed,
+        InQueue
     }
 }

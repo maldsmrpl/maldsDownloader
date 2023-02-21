@@ -1,4 +1,6 @@
-﻿using AngleSharp.Common;
+﻿using AngleSharp;
+using AngleSharp.Common;
+using AngleSharp.Io;
 using Microsoft.VisualBasic;
 using System;
 using System.Collections.Generic;
@@ -11,6 +13,7 @@ using System.IO.Packaging;
 using System.Linq;
 using System.Net;
 using System.Reflection.Emit;
+using System.Reflection.Metadata;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using System.Threading;
@@ -44,7 +47,7 @@ namespace malds_yt_downloader
         bool isDownloadingPaused = false;
 
         string dataFile = "data.bin";
-        string configFile = "config.bin";
+        string configFile = "config.ini";
 
         private void StartDownload(string urlToDownload, string filePath, string fileName)
         {
@@ -120,6 +123,7 @@ namespace malds_yt_downloader
                             Directory.CreateDirectory(pathDevidedByAuthors);
                         }
                         StartDownload(videoTask[i].VideoUrl, pathDevidedByAuthors, videoTask[i].FileName);
+                        videoTask[i].Status = Status.InProgress;
                     }
                 }
             }
@@ -132,6 +136,45 @@ namespace malds_yt_downloader
             fileopener.StartInfo.FileName = "explorer";
             fileopener.StartInfo.Arguments = "\"" + path + "\"";
             fileopener.Start();
+        }
+
+        public void SaveSettingsToIni(string configFile = "config.ini")
+        {
+            if (File.Exists(configFile))
+            {
+                File.Delete(configFile);
+            }
+            IniFile mySettings = new IniFile(configFile);
+            mySettings.Write("download path", DownloadPathTextBox.Text, "Settings");
+            mySettings.Write("quality", VideoQualityComboBox.SelectedIndex.ToString(), "Settings");
+            mySettings.Write("isFoldersByAuthor", isFoldersByAuthorCheckBox.IsChecked.ToString(), "Settings");
+        }
+
+        public void LoadSettingsFromIni(string configFile = "config.ini")
+        {
+            if (File.Exists(configFile))
+            {
+                IniFile mySettings = new IniFile(configFile);
+                DownloadPathTextBox.Text = mySettings.Read("download path", "Settings");
+
+                if (mySettings.Read("quality", "Settings") == "1")
+                {
+                    VideoQualityComboBox.SelectedIndex = 1;
+                }
+                else
+                {
+                    VideoQualityComboBox.SelectedIndex = 0;
+                }
+
+                if (mySettings.Read("isFoldersByAuthor", "Settings") == "false")
+                {
+                    isFoldersByAuthorCheckBox.IsChecked = false;
+                }
+                else
+                {
+                    isFoldersByAuthorCheckBox.IsChecked = true;
+                }
+            }
         }
 
         public int IndexOfFirstItem()
@@ -232,7 +275,7 @@ namespace malds_yt_downloader
                     addTask.DownloadQueue = AddToDownloadQueue(videoTask);
                 }
 
-                addTask.Status = Status.InProgress;
+                addTask.Status = Status.InQueue;
 
                 collection.Add(addTask);
 
@@ -256,6 +299,7 @@ namespace malds_yt_downloader
         {
             InitializeComponent();
             VideoDataGrid.ItemsSource = videoTask;
+            LoadSettingsFromIni(configFile);
         }
 
         public void VideoAddButton_Click(object sender, RoutedEventArgs e)
@@ -345,38 +389,9 @@ namespace malds_yt_downloader
             MessageBox.Show(videoTask[VideoDataGrid.SelectedIndex].Description);
         }
 
-        private void Window_Closed(object sender, EventArgs e)
-        {
-            if (File.Exists(dataFile))
-            {
-                BinaryFormatter formatter = new BinaryFormatter();
-                Stream data = File.OpenWrite(dataFile);
-                formatter.Serialize(data, videoTask);
-                data.Close();
-            }
-            else
-            {
-                File.Create(dataFile);
-            }
-
-            if (File.Exists(configFile))
-            {
-                BinaryFormatter formatter = new BinaryFormatter();
-                /*
-                Stream data = File.OpenWrite(dataFile);
-                formatter.Serialize(data, videoTask);
-                data.Close();
-                */
-
-            }
-            else
-            {
-                File.Create(configFile);
-            }
-        }
-
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
+
             if (File.Exists(dataFile))
             {
                 BinaryFormatter formatter = new BinaryFormatter();
@@ -391,22 +406,23 @@ namespace malds_yt_downloader
             {
                 File.Create(dataFile);
             }
+        }
 
-            if (File.Exists(configFile))
+        private void Window_Closed(object sender, EventArgs e)
+        {
+            if (File.Exists(dataFile))
             {
                 BinaryFormatter formatter = new BinaryFormatter();
-                /*
                 Stream data = File.OpenWrite(dataFile);
                 formatter.Serialize(data, videoTask);
                 data.Close();
-                */
-
             }
             else
             {
-                File.Create(configFile);
+                File.Create(dataFile);
             }
 
+            SaveSettingsToIni(configFile);
         }
 
         private void StartDownloadButton_Click(object sender, RoutedEventArgs e)
@@ -462,6 +478,11 @@ namespace malds_yt_downloader
             }
             VideoTab.Focus();
             playlistTask.Clear();
+        }
+
+        private void SaveSettingsButton_Click(object sender, RoutedEventArgs e)
+        {
+            SaveSettingsToIni(configFile);
         }
     }
 }
