@@ -148,6 +148,7 @@ namespace malds_yt_downloader
             mySettings.Write("download path", DownloadPathTextBox.Text, "Settings");
             mySettings.Write("quality", VideoQualityComboBox.SelectedIndex.ToString(), "Settings");
             mySettings.Write("isFoldersByAuthor", isFoldersByAuthorCheckBox.IsChecked.ToString(), "Settings");
+            mySettings.Write("isDeleteAfterCompletion", isDeleteAfterCompletionCheckBox.IsChecked.ToString(), "Settings");
         }
 
         public void LoadSettingsFromIni(string configFile = "config.ini")
@@ -166,13 +167,22 @@ namespace malds_yt_downloader
                     VideoQualityComboBox.SelectedIndex = 0;
                 }
 
-                if (mySettings.Read("isFoldersByAuthor", "Settings") == "false")
+                if (mySettings.Read("isFoldersByAuthor", "Settings") == "False")
                 {
                     isFoldersByAuthorCheckBox.IsChecked = false;
                 }
                 else
                 {
                     isFoldersByAuthorCheckBox.IsChecked = true;
+                }
+
+                if (mySettings.Read("isDeleteAfterCompletion", "Settings") == "False")
+                {
+                    isDeleteAfterCompletionCheckBox.IsChecked = false;
+                }
+                else
+                {
+                    isDeleteAfterCompletionCheckBox.IsChecked = true;
                 }
             }
         }
