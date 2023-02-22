@@ -95,6 +95,14 @@ namespace malds_yt_downloader
                 => VideoDataGrid.Items.Refresh()), System.Windows.Threading.DispatcherPriority.Background);
         }
 
+        public void CreateFolderIfNotExist(string folderName)
+        {
+            if (!Directory.Exists(folderName))
+            {
+                Directory.CreateDirectory(folderName);
+            }
+        }
+
         public void StartNextDownload()
         {
             if (videoTask.Count >= 0)
@@ -106,23 +114,39 @@ namespace malds_yt_downloader
                     DownloadPathTextBox.Text = DownloadPathTextBox.Text + '\\';
                 }
 
-                if (!Directory.Exists(DownloadPathTextBox.Text))
-                {
-                    Directory.CreateDirectory(DownloadPathTextBox.Text);
-                }
-
                 for (int i = 0; i < videoTask.Count; i++)
                 {
                     if (videoTask[i].DownloadQueue == 1)
                     {
-                        string pathDevidedByAuthors = DownloadPathTextBox.Text + FileNameWithAccaptableCharacters(videoTask[i].Author) + '\\';
-                        videoTask[i].FilePath = pathDevidedByAuthors;
-
-                        if (!Directory.Exists(pathDevidedByAuthors))
+                        if (isFoldersByAuthorCheckBox.IsChecked.Value && 
+                            videoTask[i].PlaylistName == null)
                         {
-                            Directory.CreateDirectory(pathDevidedByAuthors);
+                            videoTask[i].FilePath = 
+                                DownloadPathTextBox.Text + 
+                                FileNameWithAccaptableCharacters(videoTask[i].Author) + '\\';
                         }
-                        StartDownload(videoTask[i].VideoUrl, pathDevidedByAuthors, videoTask[i].FileName);
+                        else if (isFoldersByAuthorCheckBox.IsChecked.Value && 
+                            videoTask[i].PlaylistName != null)
+                        {
+                            videoTask[i].FilePath = 
+                                DownloadPathTextBox.Text + 
+                                FileNameWithAccaptableCharacters(videoTask[i].Author) + '\\' + 
+                                FileNameWithAccaptableCharacters(videoTask[i].PlaylistName) + '\\';
+                        }
+                        else if (!isFoldersByAuthorCheckBox.IsChecked.Value && 
+                            videoTask[i].PlaylistName != null)
+                        {
+                            videoTask[i].FilePath = 
+                                DownloadPathTextBox.Text + 
+                                FileNameWithAccaptableCharacters(videoTask[i].PlaylistName) + '\\';
+                        }
+                        else
+                        {
+                            videoTask[i].FilePath = DownloadPathTextBox.Text;
+                        }
+
+                        CreateFolderIfNotExist(videoTask[i].FilePath);
+                        StartDownload(videoTask[i].VideoUrl, videoTask[i].FilePath, videoTask[i].FileName);
                         videoTask[i].Status = Status.InProgress;
                     }
                 }
@@ -221,6 +245,11 @@ namespace malds_yt_downloader
                     }
                 }
                 videoTask[DownloadQueueNumber].DownloadQueue = null;
+
+                if (isDeleteAfterCompletionCheckBox.IsChecked.Value)
+                {
+                    videoTask.RemoveAt(DownloadQueueNumber);
+                }
             }
         }
 
@@ -237,7 +266,7 @@ namespace malds_yt_downloader
             return unFinishedConter + 1;
         }
 
-        public async void AddVideoToCollection(string url, ObservableCollection<DownloadTask> collection, bool shallIStartDownloading = false)
+        public async void AddVideoToCollection(string url, ObservableCollection<DownloadTask> collection, bool shallIStartDownloading = false, string nameOfPlaylist = null)
         {
             try
             {
@@ -277,6 +306,7 @@ namespace malds_yt_downloader
                     }
                 }
 
+                addTask.PlaylistName = nameOfPlaylist;
                 addTask.FileName = FileNameWithAccaptableCharacters(
                     $"{addTask.UploadDateString} - {addTask.Title} - ({addTask.Quality}).{addTask.Container}");
 
@@ -367,12 +397,12 @@ namespace malds_yt_downloader
 
         private void VideoUrlTextBox_GotFocus(object sender, RoutedEventArgs e)
         {
-            VideoUrlTextBox.Text = "";
+            VideoUrlTextBox.Text = string.Empty;
         }
 
         private void VideoUrlTextBox_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
-            VideoUrlTextBox.Text = "";
+            VideoUrlTextBox.Text = string.Empty;
         }
 
         private void VideoDataGrid_MouseDoubleClick(object sender, MouseButtonEventArgs e)
@@ -449,7 +479,18 @@ namespace malds_yt_downloader
         {
             if (e.Key == Key.Enter)
             {
-                VideoAddButton_Click(sender, e);
+                if (VideoTab.IsFocused)
+                {
+                    VideoAddButton_Click(sender, e);
+                }
+                else if (PlaylistTab.IsFocused)
+                {
+                    PlaylistAddButton_Click(sender, e);
+                }
+                else if (ChannelTab.IsFocused)
+                {
+                    // ChannelAddButton_Click(sender, e);
+                }
             }
         }
 
@@ -464,11 +505,15 @@ namespace malds_yt_downloader
                 {
                     foreach (var video in batch.Items)
                     {
-                        AddVideoToCollection(video.Url, playlistTask);
+                        AddVideoToCollection(video.Url, playlistTask, nameOfPlaylist: playlist.Title);
+                        PlaylistDataGrid.ItemsSource = playlistTask;
                     }
                 }
             }
-            catch { MessageBox.Show("Error of adding Playlist"); }
+            catch (Exception error)
+            { 
+                MessageBox.Show($"Error of adding Playlist \n {error.Message}"); 
+            }
             finally { PlaylistDataGrid.ItemsSource = playlistTask; }
         }
 
@@ -488,11 +533,29 @@ namespace malds_yt_downloader
             }
             VideoTab.Focus();
             playlistTask.Clear();
+            PlaylistUrlTextBox.Text = string.Empty;
         }
 
         private void SaveSettingsButton_Click(object sender, RoutedEventArgs e)
         {
             SaveSettingsToIni(configFile);
+        }
+
+        private void ClearPlaylistButton_Click(object sender, RoutedEventArgs e)
+        {
+            playlistTask.Clear();
+            PlaylistUrlTextBox.Text = string.Empty;
+            PlaylistUrlTextBox.Focus();
+        }
+
+        private void PlaylistUrlTextBox_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            PlaylistUrlTextBox.Text = string.Empty;
+        }
+
+        private void PlaylistUrlTextBox_GotFocus(object sender, RoutedEventArgs e)
+        {
+            PlaylistUrlTextBox.Text = string.Empty;
         }
     }
 }

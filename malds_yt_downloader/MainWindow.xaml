@@ -16,7 +16,7 @@
                 </Grid.RowDefinitions>
                 <StackPanel Orientation="Horizontal" Margin="4,4,4,4">
                     <Button x:Name="VideoAddButton" Content="Додати" Margin="4,4,4,4" Padding="6,1,6,1" Click="VideoAddButton_Click"/>
-                    <TextBox x:Name="VideoUrlTextBox" TextWrapping="Wrap" Width="600" Margin="4,4,4,4" VerticalContentAlignment="Center" FontSize="16" FontStyle="Italic" Text="https://youtube.com/" MouseLeftButtonDown="VideoUrlTextBox_MouseLeftButtonDown" GotFocus="VideoUrlTextBox_GotFocus"/>
+                    <TextBox x:Name="VideoUrlTextBox" TextWrapping="Wrap" Width="800" Margin="4,4,4,4" VerticalContentAlignment="Center" FontSize="16" FontStyle="Italic" Text="https://youtube.com/" MouseLeftButtonDown="VideoUrlTextBox_MouseLeftButtonDown" GotFocus="VideoUrlTextBox_GotFocus"/>
                 </StackPanel>
                 <StackPanel Grid.Row="1" Margin="4,4,4,4"/>
                 <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="4,4,4,4">
@@ -55,7 +55,7 @@
                 </Grid.RowDefinitions>
                 <StackPanel Orientation="Horizontal" Margin="4,4,4,4">
                     <Button x:Name="PlaylistAddButton" Content="Додати" Margin="4,4,4,4" Padding="6,1,6,1" Click="PlaylistAddButton_Click"/>
-                    <TextBox x:Name="PlaylistUrlTextBox" TextWrapping="Wrap" Width="600" VerticalContentAlignment="Center" FontSize="16" FontStyle="Italic" Text="https://youtube.com/" MouseLeftButtonDown="VideoUrlTextBox_MouseLeftButtonDown" GotFocus="VideoUrlTextBox_GotFocus" Margin="4,4,4,4"/>
+                    <TextBox x:Name="PlaylistUrlTextBox" TextWrapping="Wrap" Width="800" VerticalContentAlignment="Center" FontSize="16" FontStyle="Italic" Text="https://youtube.com/" GotFocus="PlaylistUrlTextBox_GotFocus" Margin="4,4,4,4" MouseLeftButtonDown="PlaylistUrlTextBox_MouseLeftButtonDown"/>
                 </StackPanel>
                 <StackPanel Grid.Row="1">
                     <DataGrid x:Name="PlaylistDataGrid" IsSynchronizedWithCurrentItem="True" SelectedIndex="-1" TabIndex="2147483639" AutoGenerateColumns="False" CanUserDeleteRows="False" CanUserAddRows="False" IsReadOnly="False" Height="304" Width="894">
@@ -80,7 +80,7 @@
                 </StackPanel>
                 <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="4,4,4,4">
                     <Button x:Name="AddSelectedVideosButton" Content="Завантажити виделене" Padding="6,1,6,4" Margin="4,4,4,4" Click="AddSelectedVideosButton_Click"/>
-                    <Button x:Name="ClearPlaylistButton" Content="Очистити список" Margin="4,4,4,4" Padding="6,1,6,1" ScrollViewer.CanContentScroll="True"/>
+                    <Button x:Name="ClearPlaylistButton" Content="Очистити список" Margin="4,4,4,4" Padding="6,1,6,1" ScrollViewer.CanContentScroll="True" Click="ClearPlaylistButton_Click"/>
                 </StackPanel>
             </Grid>
         </TabItem>

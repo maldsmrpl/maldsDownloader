@@ -28,6 +28,7 @@ namespace malds_yt_downloader
         public string FilePath { get; set; }
         public string Container { get; set; }
         public bool IsSelected { get; set; }
+        public string? PlaylistName { get; set; }
 
     }
 }

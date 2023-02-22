@@ -6,10 +6,15 @@
     <Nullable>enable</Nullable>
     <UseWPF>true</UseWPF>
     <StartupObject>malds_yt_downloader.App</StartupObject>
+    <ApplicationIcon>ship_boat_icon_246040.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>
     <None Remove="hq720.webp" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="ship_boat_icon_246040.ico" />
   </ItemGroup>
 
   <ItemGroup>
