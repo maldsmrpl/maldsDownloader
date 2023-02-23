@@ -76,7 +76,7 @@ namespace malds_yt_downloader
             double totalBytes = double.Parse(e.TotalBytesToReceive.ToString());
             double percentage = bytesIn / totalBytes * 100;
             videoTask[IndexOfFirstItem()].Progress = $"{String.Format("{0:0.0}", percentage)}%";
-            UpdateDataGrid();
+            UpdateDataGrid();            
         }
 
         void client_DownloadFileCompleted(object sender, AsyncCompletedEventArgs e)
@@ -85,6 +85,21 @@ namespace malds_yt_downloader
             videoTask[IndexOfFirstItem()].Status = Status.Completed;
             DeleteDownloadQueue(IndexOfFirstItem());
             isDownloadingInProgress = false;
+
+            var totalRemain = videoTask.Sum(s => s.SizeByteTotal);
+
+            if ((totalRemain / 1024) < 1024)
+            {
+                RemainToDownloadTextBlock.Text = $"{String.Format("{0:0.##}", (totalRemain / 1024))} kb";
+            }
+            else if (((totalRemain / 1024) / 1024) < 1024)
+            {
+                RemainToDownloadTextBlock.Text = $"{String.Format("{0:0.##}", ((totalRemain / 1024) / 1024))} mb";
+            }
+            else
+            {
+                RemainToDownloadTextBlock.Text = $"{String.Format("{0:0.##}", (((totalRemain / 1024) / 1024) / 1024))} gb";
+            }
             StartNextDownload();
             UpdateDataGrid();
         }
