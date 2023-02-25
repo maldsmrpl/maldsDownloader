@@ -29,6 +29,7 @@
                     <Button x:Name="StartDownloadButton" Content="Розпочати завантаження" Margin="4,4,4,4" Click="StartDownloadButton_Click"/>
                     <Button x:Name="PauseDownloadButton" Content="Пауза завантаження" Margin="4,4,4,4" Click="PauseDownloadButton_Click"/>
                     <TextBlock x:Name="RemainToDownloadTextBlock" TextWrapping="Wrap" Text="Залишилось: 0 б" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="4,4,4,4"/>
+                    <Label x:Name="Label1" Content="Label"/>
                 </StackPanel>
                 <DataGrid x:Name="VideoDataGrid" Grid.Row="1" IsSynchronizedWithCurrentItem="True" SelectedIndex="-1" TabIndex="2147483639" AutoGenerateColumns="False" CanUserDeleteRows="False" CanUserAddRows="False" IsReadOnly="True" Loaded="VideoDataGrid_Loaded" MouseDoubleClick="VideoDataGrid_MouseDoubleClick">
                     <DataGrid.ItemsSource>

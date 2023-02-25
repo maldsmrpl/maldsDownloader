@@ -36,6 +36,8 @@ namespace malds_yt_downloader
 {
     public partial class MainWindow : Window
     {
+        WebClient client = new WebClient();
+
         ObservableCollection<DownloadTask> videoTask 
             = new ObservableCollection<DownloadTask>();
         ObservableCollection<DownloadTask> playlistTask 
@@ -56,12 +58,13 @@ namespace malds_yt_downloader
                 try
                 {
                     isDownloadingInProgress = true;
-                    WebClient client = new WebClient();
+                    
                     client.DownloadProgressChanged 
                         += new DownloadProgressChangedEventHandler(client_DownloadProgressChanged);
                     client.DownloadFileCompleted 
                         += new AsyncCompletedEventHandler(client_DownloadFileCompleted);
                     client.DownloadFileAsync(new Uri(urlToDownload), filePath + fileName);
+                    client.DownloadFileTaskAsync(new Uri(urlToDownload), filePath + fileName)
                 }
                 catch (Exception err)
                 { 
@@ -76,6 +79,7 @@ namespace malds_yt_downloader
             double totalBytes = double.Parse(e.TotalBytesToReceive.ToString());
             double percentage = bytesIn / totalBytes * 100;
             videoTask[IndexOfFirstItem()].Progress = $"{String.Format("{0:0.0}", percentage)}%";
+            RemainToDownloadTextBlock.Text = $"Залишилось: {GetRoundedSize((double)videoTask.Sum(s => s.SizeByteTotal) - bytesIn)}";
             UpdateDataGrid();            
         }
 
@@ -85,23 +89,33 @@ namespace malds_yt_downloader
             videoTask[IndexOfFirstItem()].Status = Status.Completed;
             DeleteDownloadQueue(IndexOfFirstItem());
             isDownloadingInProgress = false;
+            RemainToDownloadTextBlock.Text = $"Залишилось: {GetRoundedSize((int)videoTask.Sum(s => s.SizeByteTotal))}";
+            StartNextDownload();
+            UpdateDataGrid();
+        }
 
-            var totalRemain = videoTask.Sum(s => s.SizeByteTotal);
-
-            if ((totalRemain / 1024) < 1024)
+        public string GetRoundedSize(double bytes)
+        {
+            double roundedSize = 0;
+            roundedSize = bytes / 1024;
+            
+            if (roundedSize < 1024)
             {
-                RemainToDownloadTextBlock.Text = $"{String.Format("{0:0.##}", (totalRemain / 1024))} kb";
-            }
-            else if (((totalRemain / 1024) / 1024) < 1024)
-            {
-                RemainToDownloadTextBlock.Text = $"{String.Format("{0:0.##}", ((totalRemain / 1024) / 1024))} mb";
+                return $"{String.Format("{0:0.0}", roundedSize)} кб";
             }
             else
             {
-                RemainToDownloadTextBlock.Text = $"{String.Format("{0:0.##}", (((totalRemain / 1024) / 1024) / 1024))} gb";
+                roundedSize /= 1024;
             }
-            StartNextDownload();
-            UpdateDataGrid();
+            if (roundedSize < 1024)
+            {
+                return $"{String.Format("{0:0.##}", roundedSize)} мб";
+            }
+            else
+            {
+                roundedSize /= 1024;
+                return $"{String.Format("{0:0.##}", roundedSize)} Гб";
+            }
         }
 
         public void UpdateDataGrid()
@@ -163,6 +177,7 @@ namespace malds_yt_downloader
                         CreateFolderIfNotExist(videoTask[i].FilePath);
                         StartDownload(videoTask[i].VideoUrl, videoTask[i].FilePath, videoTask[i].FileName);
                         videoTask[i].Status = Status.InProgress;
+                        downloadIndex = i;
                     }
                 }
             }

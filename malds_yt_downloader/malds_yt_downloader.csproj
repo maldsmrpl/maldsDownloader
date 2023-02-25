@@ -17,6 +17,7 @@
 
   <ItemGroup>
     <None Remove="hq720.webp" />
+    <None Remove="in-progress.gif" />
   </ItemGroup>
 
   <ItemGroup>
@@ -32,6 +33,10 @@
 
   <ItemGroup>
     <PackageReference Include="YoutubeExplode.Tobi" Version="6.2.4" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="in-progress.gif" />
   </ItemGroup>
 
   <ItemGroup>
