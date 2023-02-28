@@ -64,7 +64,6 @@ namespace malds_yt_downloader
                     client.DownloadFileCompleted 
                         += new AsyncCompletedEventHandler(client_DownloadFileCompleted);
                     client.DownloadFileAsync(new Uri(urlToDownload), filePath + fileName);
-                    client.DownloadFileTaskAsync(new Uri(urlToDownload), filePath + fileName)
                 }
                 catch (Exception err)
                 { 
@@ -177,7 +176,6 @@ namespace malds_yt_downloader
                         CreateFolderIfNotExist(videoTask[i].FilePath);
                         StartDownload(videoTask[i].VideoUrl, videoTask[i].FilePath, videoTask[i].FileName);
                         videoTask[i].Status = Status.InProgress;
-                        downloadIndex = i;
                     }
                 }
             }
