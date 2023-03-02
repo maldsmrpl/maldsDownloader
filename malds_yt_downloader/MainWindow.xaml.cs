@@ -29,6 +29,8 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using YoutubeExplode;
 using YoutubeExplode.Common;
+using YoutubeExplode.Playlists;
+using YoutubeExplode.Videos;
 using YoutubeExplode.Videos.Streams;
 using static System.Net.Mime.MediaTypeNames;
 
@@ -542,7 +544,10 @@ namespace malds_yt_downloader
             { 
                 MessageBox.Show($"Error of adding Playlist \n {error.Message}"); 
             }
-            finally { PlaylistDataGrid.ItemsSource = playlistTask; }
+            finally 
+            { 
+                PlaylistDataGrid.ItemsSource = playlistTask;
+            }
         }
 
         private void AddSelectedVideosButton_Click(object sender, RoutedEventArgs e)
@@ -584,6 +589,32 @@ namespace malds_yt_downloader
         private void PlaylistUrlTextBox_GotFocus(object sender, RoutedEventArgs e)
         {
             PlaylistUrlTextBox.Text = string.Empty;
+        }
+
+        private async void ChannelAddButton_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                var youtube = new YoutubeClient();
+                var channelUrl = ChannelUrlTextBox.Text;
+                var videos = youtube.Channels.GetUploadsAsync(channelUrl);
+
+                await foreach (var video in videos)
+                {
+                    AddVideoToCollection(video.Url, channelTask);
+                    ChannelDataGrid.ItemsSource = channelTask;
+                }
+
+
+            }
+            catch (Exception error)
+            {
+                MessageBox.Show($"Error of adding Channel \n {error.Message}");
+            }
+            finally
+            {
+                ChannelDataGrid.ItemsSource = channelTask;
+            }
         }
     }
 }

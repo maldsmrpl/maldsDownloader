@@ -94,7 +94,7 @@
                     <RowDefinition Height="44.94"/>
                 </Grid.RowDefinitions>
                 <StackPanel Orientation="Horizontal" Margin="4,4,4,4">
-                    <Button x:Name="ChannelAddButton" Content="Додати" Margin="4,4,4,4" Padding="6,1,6,1"/>
+                    <Button x:Name="ChannelAddButton" Content="Додати" Margin="4,4,4,4" Padding="6,1,6,1" Click="ChannelAddButton_Click"/>
                     <TextBox x:Name="ChannelUrlTextBox" TextWrapping="Wrap" Width="800" VerticalContentAlignment="Center" FontSize="16" FontStyle="Italic" Text="https://youtube.com/" Margin="4,4,4,4"/>
                 </StackPanel>
                 <StackPanel Grid.Row="1">
