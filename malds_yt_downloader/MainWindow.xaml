@@ -86,7 +86,7 @@
                 </StackPanel>
             </Grid>
         </TabItem>
-        <TabItem x:Name="ChannelTab" HorizontalAlignment="Center" Height="20" Header="Channel" VerticalAlignment="Center" Width="54">
+        <TabItem x:Name="ChannelTab" HorizontalAlignment="Center" Height="20" Header="Channel" VerticalAlignment="Center" Width="54" IsEnabled="False">
             <Grid Background="#FFE5E5E5">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="49.517"/>
