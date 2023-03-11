@@ -6,7 +6,7 @@
     <Nullable>enable</Nullable>
     <UseWPF>true</UseWPF>
     <StartupObject>malds_yt_downloader.App</StartupObject>
-    <ApplicationIcon>icon2.ico</ApplicationIcon>
+    <ApplicationIcon>icon3.ico</ApplicationIcon>
     <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
     <Title>malds_yt_downloader</Title>
     <Copyright>malds (c) 2023</Copyright>
@@ -21,7 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="icon2.ico" />
+    <Content Include="icon3.ico" />
   </ItemGroup>
 
   <ItemGroup>
